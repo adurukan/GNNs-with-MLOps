@@ -3,8 +3,5 @@ sklearn
 matplotlib
 seaborn
 numpy
-torch
-torchvision
-torchaudio
 torch-geometric
 networkx

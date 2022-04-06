@@ -11,7 +11,9 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Your ML workflow goes here
+          pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
           pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+          pip install -q git+https://github.com/pyg-team/pytorch_geometric.git
           pip install -r requirements.txt
           python train2.py
           

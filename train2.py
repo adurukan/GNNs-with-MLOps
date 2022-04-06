@@ -17,4 +17,8 @@ from networkx.generators.random_graphs import erdos_renyi_graph
 import matplotlib.pyplot as plt
 from random import randint
 
-print("Imports are all correct")
+import os
+import json
+
+with open("metrics.txt", "w") as outfile:
+    outfile.write("Imports are all correct")

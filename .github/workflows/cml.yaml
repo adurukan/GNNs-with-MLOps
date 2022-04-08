@@ -11,6 +11,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Your ML workflow goes here
+          pip install --upgrade pip
           pip install torch torchvision torchaudio
           pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.1+cpu.html
           pip install -r requirements.txt

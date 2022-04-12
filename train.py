@@ -220,3 +220,19 @@ if __name__ == "__main__":
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Train Acc: {train_acc:.4f} '
             f'Test Acc: {test_acc:.4f}')
     #torch.save(model, "models/gat_2")
+    # ONLY save the model optimized parameters & state as checkpoints, 
+    torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+            ...
+            }, PATH)
+    # Reload for further training:
+#     checkpoint = torch.load(PATH)
+#     model.load_state_dict(checkpoint['model_state_dict'])
+#     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+#     epoch = checkpoint['epoch']
+#     loss = checkpoint['loss']
+
+#     model.train()

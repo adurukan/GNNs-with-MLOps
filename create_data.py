@@ -146,7 +146,7 @@ if __name__ == "__main__":
     # reset Graph
     G = nx.MultiDiGraph
     # generate new random number for number of diamonds and nodes in total
-    num_diamonds = randint(1, 4)
+    num_diamonds = randint(5, 8)
     #num_diamonds = 5
     #num_nodes = randint(300, 500)
     num_nodes = 300

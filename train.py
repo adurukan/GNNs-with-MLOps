@@ -114,7 +114,6 @@ if __name__ == "__main__":
         for epoch in range(1, 20):
             loss = train(data)
             train_acc = test(data)
-            #test_acc = test(data)
         print(f"loss: {loss}, train_ accuracy : {train_acc}")
             #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Train Acc: {train_acc:.4f} Test Acc: {test_acc:.4f}')
     torch.save(model, "models/gat_300_2")

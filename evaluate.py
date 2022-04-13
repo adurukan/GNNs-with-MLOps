@@ -21,9 +21,13 @@ acc_graph = {}
 def evaluate(data):
     model.eval()
     out, accs = model(data.x, data.edge_index), []
-    for _, mask in data('train_mask'):
-        acc = float((out[mask].argmax(-1) == data.y[mask]).sum() / mask.sum())
-        accs.append(acc)
+    #for _, mask in data('train_mask'):
+    #print(type(out))
+    #print("\n")
+    print(out.argmax(-1))
+    print(data.y)
+    acc = float((out.argmax(-1) == data.y).sum() / data.y.sum())
+    accs.append(acc)
     return accs
     #         acc_graph[i] = acc_data
     # report_training_accuracy(acc_graph)
@@ -31,8 +35,8 @@ def evaluate(data):
 for data, i in zip(data_list, range(len(data_list))):
     accs = evaluate(data)
     acc_graph[i] = accs
-print(acc_graph)
-print(type(acc_graph))
+#print(acc_graph)
+#print(type(acc_graph))
 #report_training_accuracy(acc_graph)
 # acc_graph = evaluate()
 # print(acc_graph)

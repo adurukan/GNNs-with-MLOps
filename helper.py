@@ -63,13 +63,16 @@ def train_test_loader(data_list, graph_data):
 def get_data(graph_data, folder_path):
     data_list = []
     for file_ in graph_data:
-        G=nx.read_gpickle(f"{folder_path}/{file_}")
-        data = get_data_from_graph(G)
-        A = get_adjacency_matrix(G)
-        data.x = torch.from_numpy(A).float()
-        data.y = return_labels(G)
-        data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
-        data_list.append(data)
+        if 'gpickle' in file_:
+            print(file_)
+            G=nx.read_gpickle(f"{folder_path}/{file_}")
+            print(G)
+            data = get_data_from_graph(G)
+            A = get_adjacency_matrix(G)
+            data.x = torch.from_numpy(A).float()
+            data.y = return_labels(G)
+            data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
+            data_list.append(data)
     return data_list
 
 def report_training_accuracy(accuracy_dict):

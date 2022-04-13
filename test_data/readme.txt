@@ -1,1 +1,0 @@
-Storing the test data.

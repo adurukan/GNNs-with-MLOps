@@ -134,7 +134,7 @@ def return_labels(G):
 if __name__ == "__main__":
   # initializing various variables: number of graphs to be generated, current graph number, max depth of paths within diamond
   # useBackground: boolean variable to decide whether the diamonds should consist of completely new nodes (False) or also use nodes already in the background (True)
-  num_graphs = 10
+  num_graphs = 50
   graph_number = 0
   useBackground = True
   addDiamonds = True
@@ -169,28 +169,10 @@ if __name__ == "__main__":
         diamonds.extend(diamond.nodes)
         addPattern(G, diamond)
     # save graph in pickle file
-    nx.write_gpickle(G, "data/dataset_%s_D.gpickle" %(graph_number))
-    #nx.write_gpickle(G, "diamonds/diamond_%s_D.gpickle" %(graph_number))
+    if graph_number <= int(num_graphs * 0.85):
+        nx.write_gpickle(G, "train_data/dataset_%s_D.gpickle" %(graph_number))
+    else:
+        nx.write_gpickle(G, "test_data/dataset_%s_D.gpickle" %(graph_number))
     graph_number += 1
+    print(graph_number)
     print("graphs completed: " + str(graph_number))
-    #G2=nx.read_gpickle("data/dataset_12_D.gpickle")
-    #y = return_labels(G2)
-
-# print("Graph nodes:")
-# nodes = G2.nodes
-# print(f"type of nodes: {type(nodes)} and length of nodes: {len(nodes)}")
-# #print("Graph edges:")
-# print("\n")
-# #print(G2.edges(data=False))
-# labels = nx.get_node_attributes(G2,"suspicious")
-# print(f"type of labels: {type(labels)} and length of labels: {len(labels)}")
-# print("\n")
-# y = []
-# for label in labels.values():
-#     y.append(label)
-
-# y = np.asarray(y)
-# print(f"type of y: {type(y)} and length of y: {len(y)}")
-# print("\n")
-# print(f"y: \n {y}")
-

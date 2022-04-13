@@ -64,9 +64,9 @@ def get_data(graph_data, folder_path):
     data_list = []
     for file_ in graph_data:
         if 'gpickle' in file_:
-            print(file_)
+            #print(file_)
             G=nx.read_gpickle(f"{folder_path}/{file_}")
-            print(G)
+            #print(G)
             data = get_data_from_graph(G)
             A = get_adjacency_matrix(G)
             data.x = torch.from_numpy(A).float()

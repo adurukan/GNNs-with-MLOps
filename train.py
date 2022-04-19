@@ -87,7 +87,7 @@ def test(data):
     return accs
 
 
-def train(data):
+def train(model, data):
     model.train()
     optimizer.zero_grad()
     out = model(data.x, data.edge_index)
@@ -101,15 +101,15 @@ if __name__ == "__main__":
     data_list = get_data(graph_data, "train_data")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = torch.load("models/gat_300_2")
+    print(f"model: {model}")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
     accuracy_graph = {}
     for i, data in zip(range(len(data_list)), data_list):
         data = data.to(device)
         accuracy_epoch = []
         for epoch in range(1, 200):
-            loss = train(data)
+            loss = train(model, data)
             train_acc = test(data)
-            print(f"epoch: {epoch} with type {type(epoch)}")
             if epoch == 1:
                 accuracy_epoch.append(train_acc[0])
             elif epoch == 199:

@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torch_geometric.data import Data
 from helper import get_data, test_data, report_training_accuracy
 from gat_net import GAT
+from torch_geometric.nn import GATConv
 """
 In this script, model will be selected and it will be evaluated with the desired data.
 """

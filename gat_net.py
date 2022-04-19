@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GATConv
-from torch_geometric.nn import GATConv
 import sys
 
 class GAT(torch.nn.Module):

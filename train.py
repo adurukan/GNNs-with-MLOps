@@ -87,7 +87,7 @@ def test(data):
     return accs
 
 
-def train(model, data):
+def train(data):
     model.train()
     optimizer.zero_grad()
     out = model(data.x, data.edge_index)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         data = data.to(device)
         accuracy_epoch = []
         for epoch in range(1, 200):
-            loss = train(model, data)
+            loss = train(data)
             train_acc = test(data)
             if epoch == 1:
                 accuracy_epoch.append(train_acc[0])

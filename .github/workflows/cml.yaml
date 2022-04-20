@@ -29,5 +29,5 @@ jobs:
           python evaluate.py
           
           echo "LOGGER"
-          cat logger.txt >> report.md
-          cml-send-comment report.md
+          # cat logger.txt >> report.md
+          # cml-send-comment report.md

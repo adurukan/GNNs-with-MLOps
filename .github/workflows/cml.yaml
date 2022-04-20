@@ -3,7 +3,8 @@ on: [push]
 jobs:
   run:
     runs-on: [ubuntu-latest]
-    container: docker://dvcorg/cml-py3:latest
+    #container: docker://dvcorg/cml-py3:latest
+    container: docker://iterativeai/cml:0-dvc2-base1-gpu
     steps:
       - uses: actions/checkout@v2
       - name: cml_run
@@ -11,10 +12,10 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Your ML workflow goes here
-          pip install --upgrade pip
-          pip install torch torchvision torchaudio
-          pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.1+cpu.html
-          pip install -r requirements.txt
+          # pip install --upgrade pip
+          # pip install torch torchvision torchaudio
+          # pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.1+cpu.html
+          pip install -r requirements-pip.txt
           echo "CREATING DATA"
           python create_data.py
           echo "TRAINING THE MODEL"

@@ -12,9 +12,11 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Your ML workflow goes here
-          # pip install --upgrade pip
-          # pip install torch torchvision torchaudio
-          # pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.1+cpu.html
+          pip install --upgrade pip
+          pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+          pip install torch-sparse -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+          pip install torch-geometric
           pip install -r requirements-pip.txt
           echo "CREATING DATA"
           python create_data.py

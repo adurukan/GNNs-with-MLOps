@@ -14,8 +14,10 @@ jobs:
     #container: docker://dvcorg/cml-py3:latest
     #container: docker://iterativeai/cml:0-dvc2-base1-gpu
     steps:
-     - uses: actions/checkout@v2
-     - name: run
-       run: |
-       docker build -t testContainer .
-       docker run testContainer
+     - name: check out code
+       uses: actions/checkout@v2
+
+    - name: Build docker images
+      run: docker build -t local < ./Dockerfile
+    - name: Run tests
+      run: docker run local

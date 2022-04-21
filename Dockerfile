@@ -12,4 +12,13 @@ RUN pip install torch-geometric
 
 COPY . .
 
-CMD [ "python", "train.py"]
+RUN echo "CREATING DATA"
+RUN python create_data.py
+
+RUN echo "TRAINING THE MODEL"
+RUN python train.py
+
+RUN echo "EVALUATE THE MODEL"
+RUN python evaluate.py
+
+CMD echo "LOGGER"

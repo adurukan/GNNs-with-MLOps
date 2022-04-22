@@ -3,10 +3,11 @@
 name: DockerTest
 
 # Controls when the workflow will run
-on:
+on: [push]
   # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ initial-CI-CD-alpay ]
+  
+  #push:
+  #  branches: [ initial-CI-CD-alpay ]
 
 jobs:
   run:

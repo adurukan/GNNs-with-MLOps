@@ -1,7 +1,0 @@
-pandas
-sklearn
-matplotlib
-seaborn
-numpy
-torch-geometric
-networkx

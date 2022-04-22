@@ -1,0 +1,33 @@
+name: GNN Experiments
+on: [push]
+jobs:
+  run:
+    runs-on: [ubuntu-latest]
+    #container: docker://dvcorg/cml-py3:latest
+    container: docker://iterativeai/cml:0-dvc2-base1-gpu
+    steps:
+      - uses: actions/checkout@v2
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Your ML workflow goes here
+          echo "UPGRADING PIP"
+          pip install --upgrade pip
+          echo "INSTALLING TORCH TORCHVISION TORCHAUDIO"
+          pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+          echo "INSTALLING TORCH-SCATTER TORCH-SPARSE TORCH-GEOMETRIC"
+          pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+          pip install torch-sparse -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+          pip install torch-geometric
+          pip install -r requirements-pip.txt
+          echo "CREATING DATA"
+          python create_data.py
+          echo "TRAINING THE MODEL"
+          python train.py
+          echo "EVALUATE THE MODEL"
+          python evaluate.py
+          
+          echo "LOGGER"
+          # cat logger.txt >> report.md
+          # cml-send-comment report.md

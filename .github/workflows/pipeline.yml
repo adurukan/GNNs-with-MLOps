@@ -1,0 +1,21 @@
+# This is a basic workflow to help you get started with Actions
+
+name: DockerTest
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ initial-CI-CD-alpay ]
+
+jobs:
+  run:
+    runs-on: [ubuntu-latest]
+    steps:
+     - name: check out code
+       uses: actions/checkout@v2
+
+     - name: Build docker images
+       run: docker build -t local .
+     - name: Run tests
+       run: docker run local

@@ -181,4 +181,4 @@ if __name__ == "__main__":
             nx.write_gpickle(G, "test_data/dataset_%s_D.gpickle" % (graph_number))
         graph_number += 1
         # print(graph_number)
-print("graphs completed: " + str(graph_number))
+    print("graphs completed: " + str(graph_number))

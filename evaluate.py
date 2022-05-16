@@ -22,6 +22,7 @@ def evaluate(data):
     out, accs = model(data.x, data.edge_index), []
     acc = float((out.argmax(-1) == data.y).sum() / data.y.shape[0])
     accs.append(acc)
+    print(out)
     return accs
 
 

@@ -44,46 +44,12 @@ def get_data_from_graph(G):
     return data
 
 
-# def retrieve_masks(y):
-#     """Retrieving masks"""
-#     train_mask = torch.full_like(y, False, dtype=bool)
-#     train_mask[:] = True
-#     val_mask = torch.full_like(y, False, dtype=bool)
-#     val_mask[:] = False
-#     test_mask = torch.full_like(y, False, dtype=bool)
-#     test_mask[:] = False
-#     return train_mask, val_mask, test_mask
-
-
-# def train_test_loader(data_list, onlyfiles):
-#     for file_ in onlyfiles:
-#         G=nx.read_gpickle(f"data/{file_}")
-#         data = get_data_from_graph(G)
-#         A = get_adjacency_matrix(G)
-#         data.x = torch.from_numpy(A).float()
-#         #print(f"shape of data.x: {data.x.shape}")
-#         data.y = return_labels(G)
-#         #data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
-#         data.num_features = data.x.shape[1]
-#         #print(data.num_features)
-#         data_list.append(data)
-#     #print(f"length of data_list: {len(data_list)}")
-#     train_dataset = data_list[len(data_list) // 10:]
-#     test_dataset = data_list[:len(data_list) // 10]
-#     train_loader = DataLoader(train_dataset, batch_size=10, shuffle=False)
-#     test_loader = DataLoader(test_dataset, batch_size=10)
-#     return train_loader, test_loader
-
-
 @torch.no_grad()
 def test(data):
     model.eval()
     out, accs = model(data.x, data.edge_index), []
     acc = float((out.argmax(-1) == data.y).sum() / data.y.shape[0])
     accs.append(acc)
-    # for _, mask in data("train_mask"):
-    #     acc = float((out[mask].argmax(-1) == data.y[mask]).sum() / mask.sum())
-    #     accs.append(acc)
     return accs
 
 
@@ -100,22 +66,29 @@ def train(data):
 if __name__ == "__main__":
     data_list = get_data(graph_data, "train_data")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.load("models/gat_300_2")
-    print(f"model: {model}")
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
+    model = GAT(100, 2)
+    # model = torch.load("models/gat_100_2")
+    model.load_state_dict(torch.load("models/gat_100_2_state_dict"))
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
     accuracy_graph = {}
     for i, data in zip(range(len(data_list)), data_list):
         data = data.to(device)
         accuracy_epoch = []
-        for epoch in range(1, 200):
+        for epoch in range(1, 1000):
             loss = train(data)
             train_acc = test(data)
-            if epoch == 1:
-                accuracy_epoch.append(train_acc[0])
-            elif epoch == 199:
+            if epoch % 100 == 0:
                 accuracy_epoch.append(train_acc[0])
         accuracy_graph[i] = accuracy_epoch
-        # print(f"loss: {loss}, train_ accuracy : {train_acc}")
-        # print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Train Acc: {train_acc:.4f} Test Acc: {test_acc:.4f}')
     print(json.dumps(accuracy_graph, sort_keys=True, indent=4))
-    torch.save(model, "models/gat_300_2")
+    # torch.save(model, "models/gat_100_2")
+    torch.save(model.state_dict(), "models/gat_100_2_state_dict")
+    # Print model's state_dict
+    # print("Model's state_dict:")
+    # for param_tensor in model.state_dict():
+    #     print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+
+    # # Print optimizer's state_dict
+    # print("Optimizer's state_dict:")
+    # for var_name in optimizer.state_dict():
+    #     print(var_name, "\t", optimizer.state_dict()[var_name])

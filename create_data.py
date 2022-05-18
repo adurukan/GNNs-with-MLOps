@@ -150,10 +150,10 @@ if __name__ == "__main__":
         # reset Graph
         G = nx.MultiDiGraph
         # generate new random number for number of diamonds and nodes in total
-        num_diamonds = randint(5, 8)
+        num_diamonds = randint(3, 5)
         # num_diamonds = 5
         # num_nodes = randint(300, 500)
-        num_nodes = 300
+        num_nodes = 100
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
         G = addedges(G_er, k=3)
@@ -181,4 +181,4 @@ if __name__ == "__main__":
             nx.write_gpickle(G, "test_data/dataset_%s_D.gpickle" % (graph_number))
         graph_number += 1
         # print(graph_number)
-print("graphs completed: " + str(graph_number))
+# print("graphs completed: " + str(graph_number))

@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from helper import get_data, test_data, report_training_accuracy
+from gat_net import GAT
 
 # from gat_net import GAT
 # from torch_geometric.nn import GATConv
@@ -13,7 +14,9 @@ with open("logger.txt", "w") as outfile:
 
 data_list = get_data(test_data, "test_data")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = torch.load("models/gat_100_2").to(device)
+# model = torch.load("models/gat_100_2").to(device)
+model = GAT(100, 2).to(device)
+model.load_state_dict(torch.load("models/gat_100_2_state_dict"))
 acc_graph = {}
 
 

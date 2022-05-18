@@ -138,7 +138,7 @@ def return_labels(G):
 if __name__ == "__main__":
     # initializing various variables: number of graphs to be generated, current graph number, max depth of paths within diamond
     # useBackground: boolean variable to decide whether the diamonds should consist of completely new nodes (False) or also use nodes already in the background (True)
-    num_graphs = 50
+    num_graphs = 100
     graph_number = 0
     useBackground = True
     addDiamonds = True

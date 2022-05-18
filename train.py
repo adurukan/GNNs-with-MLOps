@@ -69,12 +69,12 @@ if __name__ == "__main__":
     model = GAT(100, 2)
     # model = torch.load("models/gat_100_2")
     model.load_state_dict(torch.load("models/gat_100_2_state_dict"))
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     accuracy_graph = {}
     for i, data in zip(range(len(data_list)), data_list):
         data = data.to(device)
         accuracy_epoch = []
-        for epoch in range(1, 1000):
+        for epoch in range(1, 200):
             loss = train(data)
             train_acc = test(data)
             if epoch % 100 == 0:
@@ -83,6 +83,7 @@ if __name__ == "__main__":
     print(json.dumps(accuracy_graph, sort_keys=True, indent=4))
     # torch.save(model, "models/gat_100_2")
     torch.save(model.state_dict(), "models/gat_100_2_state_dict")
+
     # Print model's state_dict
     # print("Model's state_dict:")
     # for param_tensor in model.state_dict():

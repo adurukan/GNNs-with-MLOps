@@ -10,11 +10,9 @@ class GAT(torch.nn.Module):
 
         self.conv1 = GATConv(in_channels, 10, heads=10, dropout=0.5)
         self.conv2 = GATConv(10 * 10, 10, heads=8, dropout=0.5)
-        self.conv3 = GATConv(10 * 8, 10, heads=6, dropout=0.5)
-        self.conv4 = GATConv(10 * 6, 10, heads=4, dropout=0.5)
-        self.conv5 = GATConv(10 * 4, 10, heads=2, dropout=0.5)
-        self.conv6 = GATConv(10 * 2, 10, heads=1, dropout=0.5)
-        self.conv7 = GATConv(10 * 1, out_channels, heads=1, concat=False, dropout=0.5)
+        self.conv3 = GATConv(10 * 8, 10, heads=4, dropout=0.5)
+        self.conv4 = GATConv(10 * 4, 10, heads=1, dropout=0.5)
+        self.conv5 = GATConv(10 * 1, out_channels, heads=1, concat=False, dropout=0.5)
 
     def forward(self, x, edge_index):
         x = F.dropout(x, p=0.5, training=self.training)
@@ -26,11 +24,7 @@ class GAT(torch.nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = F.elu(self.conv4(x, edge_index))
         x = F.dropout(x, p=0.5, training=self.training)
-        x = F.elu(self.conv5(x, edge_index))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = F.elu(self.conv6(x, edge_index))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.conv7(x, edge_index)
+        x = self.conv5(x, edge_index)
         return F.log_softmax(x, dim=-1)
 
 

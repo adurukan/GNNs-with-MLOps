@@ -193,7 +193,7 @@ if __name__ == "__main__":
         # create an empty graph to hold diamonds
         dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
-        num_diamonds = randint(8, 10)
+        num_diamonds = randint(2, 2)
         num_nodes = 100
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
@@ -218,7 +218,7 @@ if __name__ == "__main__":
                 addPattern(G, diamond)
         with open(f"graphplots/real_diamonds/{i}.json", "w") as outfile:
             json.dump(diamonds, outfile, indent=8)
-        # create_plot(dd, list(diamonds), "#00ffff", "created-diamonds_" + str(i))
+        create_plot(dd, list(diamonds), "#00ffff", "created-diamonds_" + str(i))
         # save graph in pickle file
         if graph_number <= int(num_graphs * 0.85):
             nx.write_gpickle(G, "train_data/dataset_%s_D.gpickle" % (graph_number))

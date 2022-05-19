@@ -6,8 +6,10 @@ from torch_geometric.utils import from_networkx
 
 # from torch_geometric.nn import GATConv
 from gat_net import GAT
+from gcn_net import GCN
 import networkx as nx
 from helper import get_data, graph_data
+import os
 
 """
 In this script, model&data will be loaded and model will be trained accordingly.
@@ -66,23 +68,34 @@ def train(data):
 if __name__ == "__main__":
     data_list = get_data(graph_data, "train_data")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = GAT(100, 2)
+    # path_state_dict = "models/gat_100_2_state_dict"
+    # model = GAT(100, 2)
+    path_state_dict = "models/gcn_100_2_state_dict"
+    model = GCN(100, 2)
     # model = torch.load("models/gat_100_2")
-    model.load_state_dict(torch.load("models/gat_100_2_state_dict"))
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    accuracy_graph = {}
+    if os.path.isfile(path_state_dict):
+        print("State Dict exists")
+        model.load_state_dict(torch.load(path_state_dict))
+    else:
+        pass
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
+    # accuracy_graph = {}
     for i, data in zip(range(len(data_list)), data_list):
+        print(f"Number of data: {i}")
+        print("------------------------")
         data = data.to(device)
-        accuracy_epoch = []
-        for epoch in range(1, 200):
+        # accuracy_epoch = []
+        for epoch in range(0, 201):
             loss = train(data)
             train_acc = test(data)
             if epoch % 100 == 0:
-                accuracy_epoch.append(train_acc[0])
-        accuracy_graph[i] = accuracy_epoch
-    print(json.dumps(accuracy_graph, sort_keys=True, indent=4))
+                print(f"EPOCH: {epoch}")
+                print(f"accuracy: {train_acc[0]} \n")
+                # accuracy_epoch.append(train_acc[0])
+    #    accuracy_graph[i] = accuracy_epoch
+    # print(json.dumps(accuracy_graph, sort_keys=True, indent=4))
     # torch.save(model, "models/gat_100_2")
-    torch.save(model.state_dict(), "models/gat_100_2_state_dict")
+    torch.save(model.state_dict(), path_state_dict)
 
     # Print model's state_dict
     # print("Model's state_dict:")

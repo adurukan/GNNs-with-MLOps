@@ -1,0 +1,25 @@
+{
+        "accuracy": 0.6571428571428573,
+        "recall": 0.004464285714285714,
+        "specifity": 0.9915966386554622,
+        "precision": [
+                "No positives",
+                0.2,
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives"
+        ],
+        "f_score": [
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0"
+        ]
+}
+
+incidences with dimensionality reduction, gcn of 3 layers.

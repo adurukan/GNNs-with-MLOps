@@ -1,0 +1,25 @@
+{
+        "accuracy": 0.6585714285714286,
+        "recall": 0.057801498977969566,
+        "specifity": 0.9647495361781077,
+        "precision": [
+                0.5263157894736842,
+                "No positives",
+                0.5,
+                "No positives",
+                "No positives",
+                0.3333333333333333,
+                "No positives"
+        ],
+        "f_score": [
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0"
+        ]
+}
+
+incidences + adjacency, gcn of 3 layers

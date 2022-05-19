@@ -1,0 +1,25 @@
+{
+        "accuracy": 0.6614285714285714,
+        "recall": 0.0,
+        "specifity": 1.0,
+        "precision": [
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives",
+                "No positives"
+        ],
+        "f_score": [
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0",
+                "Precision + Recall !> 0"
+        ]
+}
+
+degrees, gcn of 3 layers.

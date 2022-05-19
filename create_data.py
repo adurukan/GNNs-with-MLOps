@@ -12,14 +12,12 @@ import matplotlib.pyplot as plt
 import pickle
 import networkx as nx
 from networkx.generators.random_graphs import erdos_renyi_graph
-import matplotlib.pyplot as plt
 from random import randint
-import networkx as nx
-from networkx.generators.random_graphs import erdos_renyi_graph
-from random import randint
-import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
+import json
+
+# from visualize import create_plot
 
 """
 In this script, data of various nodes, numbers of diamond patterns, and probability are created and all those are to be stored in data/
@@ -70,13 +68,50 @@ def addedges(G, k):
     return G
 
 
-def visualize(G):
-    print("Generated background has" + str(len(G.edges)) + "edges.")
-    print(G.edges(data=False))
-    print(G.nodes)
-    nx.draw(G, with_labels=True, font_weight="bold")
+# def visualize(G):
+#     print("Generated background has" + str(len(G.edges)) + "edges.")
+#     print(G.edges(data=False))
+#     print(G.nodes)
+#     nx.draw(G, with_labels=True, font_weight="bold")
 
-    plt.show()
+#     plt.show()
+
+
+def filter_edge(nodelist, edge):
+    return all(e in nodelist for e in [edge[0], edge[1]])
+
+
+def create_plot(G, nodelist, colors, name):
+    """Takes in a Graph, color string or list and name of file to save plot in"""
+    pos = nx.random_layout(G)
+    nx.draw_networkx_nodes(G, pos, nodelist, node_color=colors, node_size=100, alpha=1)
+    nx.draw_networkx_labels(
+        G,
+        pos,
+        font_size=9,
+    )
+    ax = plt.gca()
+    for e in G.edges(nodelist):
+        if filter_edge(nodelist, e):
+            ax.annotate(
+                "",
+                xy=pos[e[0]],
+                xycoords="data",
+                xytext=pos[e[1]],
+                textcoords="data",
+                arrowprops=dict(
+                    arrowstyle="->",
+                    color="0.5",
+                    shrinkA=5,
+                    shrinkB=5,
+                    patchA=None,
+                    patchB=None,
+                    connectionstyle="arc3,rad=rrr".replace("rrr", str(0.3 * 0)),
+                ),
+            )
+    plt.axis("off")
+    plt.savefig("graphplots/real_diamonds/%s.png" % (name))
+    plt.close()
 
 
 def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
@@ -85,6 +120,7 @@ def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
 
     existingDiamonds = nx.get_node_attributes(BG, "suspicious")
     diamondNodes = [k for k, v in existingDiamonds.items() if v == 1]
+    # print(f"diamondNodes: {diamondNodes}")
 
     v = []
     e = []
@@ -98,12 +134,17 @@ def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
                 newNode = randint(n + 1, n + n + n)
 
         v.append(newNode)
-
+    # print(f"v: {v}")
     for y in range(len(v) - 1):
         e.append((v[y], v[y + 1]))
     G = nx.MultiDiGraph(e)
+    # print(f"start_node: {startNode}")
+    # print(f"endNode: {endNode}")
     G.add_nodes_from([startNode, endNode])
-    G.add_edges_from([(startNode, v[0]), (v[-1], endNode)])
+    G.add_edges_from(
+        [(v[0], startNode), (endNode, v[0]), (v[1], startNode), (endNode, v[1])]
+    )
+    # G.add_edges_from([(v[0], startNode), (endNode, v[-1])])
     return G
 
 
@@ -138,21 +179,21 @@ def return_labels(G):
 if __name__ == "__main__":
     # initializing various variables: number of graphs to be generated, current graph number, max depth of paths within diamond
     # useBackground: boolean variable to decide whether the diamonds should consist of completely new nodes (False) or also use nodes already in the background (True)
-    num_graphs = 100
+    num_graphs = 50
     graph_number = 0
     useBackground = True
     addDiamonds = True
-    maxPathDepth = 5
+    maxPathDepth = 2
 
     for i in range(num_graphs):
         # diamond lst
         diamonds = []
         # reset Graph
         G = nx.MultiDiGraph
+        # create an empty graph to hold diamonds
+        dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
-        num_diamonds = randint(3, 5)
-        # num_diamonds = 5
-        # num_nodes = randint(300, 500)
+        num_diamonds = randint(8, 10)
         num_nodes = 100
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
@@ -162,7 +203,7 @@ if __name__ == "__main__":
             # run loop as many times as the number of Diamonds to be generated
             for d in range(num_diamonds):
                 # generate new random numbers for split degree and start and end nodes
-                splitDegree = 3
+                splitDegree = 1
                 startNode = randint(0, num_nodes // 2)
                 endNode = randint(0, num_nodes - 1)
                 # incase start and end happen to be the same
@@ -173,7 +214,11 @@ if __name__ == "__main__":
                     G, startNode, endNode, splitDegree, maxPathDepth, useBackground
                 )
                 diamonds.extend(diamond.nodes)
+                dd = nx.compose(dd, diamond)
                 addPattern(G, diamond)
+        with open(f"graphplots/real_diamonds/{i}.json", "w") as outfile:
+            json.dump(diamonds, outfile, indent=8)
+        # create_plot(dd, list(diamonds), "#00ffff", "created-diamonds_" + str(i))
         # save graph in pickle file
         if graph_number <= int(num_graphs * 0.85):
             nx.write_gpickle(G, "train_data/dataset_%s_D.gpickle" % (graph_number))

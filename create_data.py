@@ -193,7 +193,7 @@ if __name__ == "__main__":
         # create an empty graph to hold diamonds
         dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
-        num_diamonds = randint(2, 2)
+        num_diamonds = randint(6, 10)
         num_nodes = 100
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)

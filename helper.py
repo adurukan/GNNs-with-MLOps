@@ -13,6 +13,7 @@ import glob
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
+import matplotlib.pyplot as plt
 
 graph_data = [f for f in listdir("train_data") if isfile(join("train_data", f))]
 test_data = [f for f in listdir("test_data") if isfile(join("test_data", f))]
@@ -125,6 +126,7 @@ def get_incidence_matrix(G):
 def tsvd(features):
     tsvd = TruncatedSVD(500)
     tsvd_features = tsvd.fit_transform(features)
+    print(f"shape of tsvd_features: {tsvd_features.shape}")
     return tsvd_features
 
 
@@ -150,7 +152,7 @@ def get_data(graph_data, folder_path):
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
             incidences = tsvd(incidences)
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
-            data.x = torch.from_numpy(A).float()
+            data.x = torch.from_numpy(incidences).float()
             data.y = return_labels(G)
             data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
             data_list.append(data)
@@ -168,3 +170,40 @@ def report_training_accuracy(accuracy_dict):
         )  # ['1.json', '3.json', '2.json'] -> '4.json'
         with open(f"metrics/{new_file_name}", "w") as outfile:
             json.dump(accuracy_dict, outfile, indent=8)
+
+
+def filter_edge(nodelist, edge):
+    return all(e in nodelist for e in [edge[0], edge[1]])
+
+
+def create_plot(G, nodelist, colors, name):
+    """Takes in a Graph, color string or list and name of file to save plot in"""
+    pos = nx.random_layout(G)
+    nx.draw_networkx_nodes(G, pos, nodelist, node_color=colors, node_size=100, alpha=1)
+    nx.draw_networkx_labels(
+        G,
+        pos,
+        font_size=9,
+    )
+    ax = plt.gca()
+    for e in G.edges(nodelist):
+        if filter_edge(nodelist, e):
+            ax.annotate(
+                "",
+                xy=pos[e[0]],
+                xycoords="data",
+                xytext=pos[e[1]],
+                textcoords="data",
+                arrowprops=dict(
+                    arrowstyle="->",
+                    color="0.5",
+                    shrinkA=5,
+                    shrinkB=5,
+                    patchA=None,
+                    patchB=None,
+                    connectionstyle="arc3,rad=rrr".replace("rrr", str(0.3 * 0)),
+                ),
+            )
+    plt.axis("off")
+    plt.savefig("graphplots/real_diamonds/%s.png" % (name))
+    plt.close()

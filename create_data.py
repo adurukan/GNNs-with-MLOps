@@ -7,8 +7,8 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GATConv
 from torch_geometric.datasets import Planetoid
 from torch_geometric.utils import from_networkx
+from helper import create_plot
 import torch_geometric.transforms as T
-import matplotlib.pyplot as plt
 import pickle
 import networkx as nx
 from networkx.generators.random_graphs import erdos_renyi_graph
@@ -66,52 +66,6 @@ def addedges(G, k):
         G.add_edges_from(added_edge)
     nx.set_node_attributes(G, 0, "suspicious")
     return G
-
-
-# def visualize(G):
-#     print("Generated background has" + str(len(G.edges)) + "edges.")
-#     print(G.edges(data=False))
-#     print(G.nodes)
-#     nx.draw(G, with_labels=True, font_weight="bold")
-
-#     plt.show()
-
-
-def filter_edge(nodelist, edge):
-    return all(e in nodelist for e in [edge[0], edge[1]])
-
-
-def create_plot(G, nodelist, colors, name):
-    """Takes in a Graph, color string or list and name of file to save plot in"""
-    pos = nx.random_layout(G)
-    nx.draw_networkx_nodes(G, pos, nodelist, node_color=colors, node_size=100, alpha=1)
-    nx.draw_networkx_labels(
-        G,
-        pos,
-        font_size=9,
-    )
-    ax = plt.gca()
-    for e in G.edges(nodelist):
-        if filter_edge(nodelist, e):
-            ax.annotate(
-                "",
-                xy=pos[e[0]],
-                xycoords="data",
-                xytext=pos[e[1]],
-                textcoords="data",
-                arrowprops=dict(
-                    arrowstyle="->",
-                    color="0.5",
-                    shrinkA=5,
-                    shrinkB=5,
-                    patchA=None,
-                    patchB=None,
-                    connectionstyle="arc3,rad=rrr".replace("rrr", str(0.3 * 0)),
-                ),
-            )
-    plt.axis("off")
-    plt.savefig("graphplots/real_diamonds/%s.png" % (name))
-    plt.close()
 
 
 def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
@@ -179,7 +133,7 @@ def return_labels(G):
 if __name__ == "__main__":
     # initializing various variables: number of graphs to be generated, current graph number, max depth of paths within diamond
     # useBackground: boolean variable to decide whether the diamonds should consist of completely new nodes (False) or also use nodes already in the background (True)
-    num_graphs = 50
+    num_graphs = 100
     graph_number = 0
     useBackground = True
     addDiamonds = True
@@ -193,8 +147,8 @@ if __name__ == "__main__":
         # create an empty graph to hold diamonds
         dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
-        num_diamonds = randint(6, 10)
-        num_nodes = 100
+        num_diamonds = randint(20, 30)
+        num_nodes = 500
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
         G = addedges(G_er, k=3)

@@ -8,9 +8,9 @@ class GCN(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
 
-        self.conv1 = GCNConv(in_channels, 64)
-        self.conv2 = GCNConv(64, 16)
-        self.conv3 = GCNConv(16, out_channels)
+        self.conv1 = GCNConv(in_channels, 100)
+        self.conv2 = GCNConv(100, 32)
+        self.conv3 = GCNConv(32, out_channels)
 
     def forward(self, x, edge_index):
         x = F.relu(self.conv1(x, edge_index))

@@ -10,6 +10,9 @@ from gcn_net import GCN
 import networkx as nx
 from helper import get_data, graph_data
 import os
+import warnings
+
+warnings.filterwarnings("ignore")
 
 """
 In this script, model&data will be loaded and model will be trained accordingly.
@@ -71,13 +74,14 @@ if __name__ == "__main__":
     # path_state_dict = "models/gat_100_2_state_dict"
     # model = GAT(100, 2)
     path_state_dict = "models/gcn_100_2_state_dict"
-    model = GCN(100, 2)
+    model = GCN(500, 2)
     # model = torch.load("models/gat_100_2")
     if os.path.isfile(path_state_dict):
         print("State Dict exists")
         model.load_state_dict(torch.load(path_state_dict))
     else:
         pass
+    print(f"Model: \n {model}")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
     # accuracy_graph = {}
     for i, data in zip(range(len(data_list)), data_list):

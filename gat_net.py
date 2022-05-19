@@ -25,7 +25,7 @@ class GAT(torch.nn.Module):
         x = F.elu(self.conv4(x, edge_index))
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.conv5(x, edge_index)
-        return F.log_softmax(x, dim=-1)
+        return F.log_softmax(x, dim=1)
 
 
 def create_save_model():

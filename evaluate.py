@@ -2,9 +2,11 @@ import numpy as np
 import torch
 from helper import get_data, test_data, report_training_accuracy
 from gat_net import GAT
+from gcn_net import GCN
+import warnings
+import os
 
-# from gat_net import GAT
-# from torch_geometric.nn import GATConv
+warnings.filterwarnings("ignore")
 """
 In this script, model will be selected and it will be evaluated with the desired data.
 """
@@ -14,9 +16,19 @@ with open("logger.txt", "w") as outfile:
 
 data_list = get_data(test_data, "test_data")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# model = torch.load("models/gat_100_2").to(device)
-model = GAT(100, 2).to(device)
-model.load_state_dict(torch.load("models/gat_100_2_state_dict"))
+
+# path_state_dict = "models/gat_100_2_state_dict"
+# model = GAT(100, 2)
+path_state_dict = "models/gcn_100_2_state_dict"
+model = GCN(500, 2)
+
+if os.path.isfile(path_state_dict):
+    print("State Dict exists")
+    model.load_state_dict(torch.load(path_state_dict))
+else:
+    pass
+print(f"Model: \n {model}")
+
 acc_graph = {}
 
 
@@ -81,7 +93,7 @@ if __name__ == "__main__":
             precision = TP / (TP + FP)
         else:
             precision = "No positives"
-        if type(precision) == int and type(recall) == int:
+        if type(precision) == float and type(recall) == float:
             f_score = (2 * precision * recall) / (precision + recall)
         else:
             f_score = "Precision + Recall !> 0"

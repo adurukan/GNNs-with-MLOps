@@ -126,7 +126,6 @@ def get_incidence_matrix(G):
 def tsvd(features):
     tsvd = TruncatedSVD(500)
     tsvd_features = tsvd.fit_transform(features)
-    print(f"shape of tsvd_features: {tsvd_features.shape}")
     return tsvd_features
 
 
@@ -136,6 +135,7 @@ def get_data(graph_data, folder_path):
         if "gpickle" in file_:
             G = nx.read_gpickle(f"{folder_path}/{file_}")
             data = get_data_from_graph(G)
+            data.edge_index = data.edge_index
             A = get_adjacency_matrix(G)
             # print(f"A: {A.shape} \t {type(A)}")
             embeddings = return_embeddings(G)

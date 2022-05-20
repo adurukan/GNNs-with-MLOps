@@ -129,6 +129,34 @@ def tsvd(features):
     return tsvd_features
 
 
+def get_clustering(G):
+    num_nodes = len(G.nodes)
+    G = nx.DiGraph(G)
+    clustering_coefficient = nx.clustering(G)
+    clustered_coefficients = []
+    for i in sorted(clustering_coefficient.items()):
+        clustered_coefficients.append(i[1])
+    clustered_matrix = np.zeros([num_nodes, num_nodes])
+    for i in range(num_nodes):
+        clustered_matrix[i, i] = clustered_coefficients[i]
+    return clustered_matrix
+
+
+def get_A_clustered(G):
+    G = nx.DiGraph(G)
+    clustering_coefficient = nx.clustering(G)
+    clustered_coefficients = []
+    for i in sorted(clustering_coefficient.items()):
+        clustered_coefficients.append(i[1])
+    A = get_adjacency_matrix(G)
+    I = np.identity(A.shape[0])
+    A = A + I
+    A_clustered = np.empty([A.shape[0], A.shape[1]])
+    for i in range(A.shape[0]):
+        A_clustered[i] = A[i] + clustered_coefficients
+    return A_clustered
+
+
 def get_data(graph_data, folder_path):
     data_list = []
     for file_ in graph_data:
@@ -152,7 +180,13 @@ def get_data(graph_data, folder_path):
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
             incidences = tsvd(incidences)
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
-            data.x = torch.from_numpy(incidences).float()
+            clustering_matrix = get_clustering(G)
+            print(
+                f"clustering_matrix: {clustering_matrix.shape} \t {type(clustering_matrix)}"
+            )
+            A_clustered = get_A_clustered(G)
+            # print(f"A_clustered: {A_clustered.shape} \t {type(A_clustered)}")
+            data.x = torch.from_numpy(clustering_matrix).float()
             data.y = return_labels(G)
             data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
             data_list.append(data)
@@ -205,5 +239,5 @@ def create_plot(G, nodelist, colors, name):
                 ),
             )
     plt.axis("off")
-    plt.savefig("graphplots/real_diamonds/%s.png" % (name))
+    plt.savefig("%s.png" % (name))
     plt.close()

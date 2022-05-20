@@ -24,17 +24,17 @@ with open("logger.txt", "w") as outfile:
 
 # onlyfiles = [f for f in listdir("data") if isfile(join("data", f))]
 # onlyfiles = get_data(graph_data, "train_data")
-def return_labels(G):
-    """Returning labels for training."""
-    nodes = G.nodes
-    labels = nx.get_node_attributes(G, "suspicious")
-    y = []
-    for label in labels.values():
-        y.append(label)
-    y = np.asarray(y)
-    y = torch.from_numpy(y)
-    y = y.type(torch.long)
-    return y
+# def return_labels(G):
+#     """Returning labels for training."""
+#     nodes = G.nodes
+#     labels = nx.get_node_attributes(G, "suspicious")
+#     y = []
+#     for label in labels.values():
+#         y.append(label)
+#     y = np.asarray(y)
+#     y = torch.from_numpy(y)
+#     y = y.type(torch.long)
+#     return y
 
 
 def get_adjacency_matrix(G):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = GCN(500, 2)
+    model = GCN(200, 2)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
     def train():

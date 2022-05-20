@@ -7,7 +7,7 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GATConv
 from torch_geometric.datasets import Planetoid
 from torch_geometric.utils import from_networkx
-from helper import create_plot
+from helper import create_plot, return_labels, get_A_clustered
 import torch_geometric.transforms as T
 import pickle
 import networkx as nx
@@ -73,6 +73,7 @@ def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
     n = len(nodes)
 
     existingDiamonds = nx.get_node_attributes(BG, "suspicious")
+    # print(f"existingDiamonds: {existingDiamonds}")
     diamondNodes = [k for k, v in existingDiamonds.items() if v == 1]
     # print(f"diamondNodes: {diamondNodes}")
 
@@ -86,6 +87,8 @@ def generateRandomLengthPath(BG, startNode, endNode, maxDepth, useBackground):
         if not useBackground:
             while newNode in nodes:
                 newNode = randint(n + 1, n + n + n)
+        while newNode == startNode or newNode == endNode:
+            newNode = randint(0, n - 1)
 
         v.append(newNode)
     # print(f"v: {v}")
@@ -120,14 +123,14 @@ def addPattern(G, pattern):
     G.update(pattern)
 
 
-def return_labels(G):
-    nodes = G.nodes
-    labels = nx.get_node_attributes(G, "suspicious")
-    y = []
-    for label in labels.values():
-        y.append(label)
-    y = np.asarray(y)
-    return y
+# def return_labels(G):
+#     nodes = G.nodes
+#     labels = nx.get_node_attributes(G, "suspicious")
+#     y = []
+#     for label in labels.values():
+#         y.append(label)
+#     y = np.asarray(y)
+#     return y
 
 
 if __name__ == "__main__":
@@ -148,7 +151,7 @@ if __name__ == "__main__":
         dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
         num_diamonds = randint(20, 30)
-        num_nodes = 500
+        num_nodes = 200
         # Create Background Graph
         G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
         G = addedges(G_er, k=3)
@@ -158,7 +161,7 @@ if __name__ == "__main__":
             for d in range(num_diamonds):
                 # generate new random numbers for split degree and start and end nodes
                 splitDegree = 1
-                startNode = randint(0, num_nodes // 2)
+                startNode = randint(0, num_nodes - 1)
                 endNode = randint(0, num_nodes - 1)
                 # incase start and end happen to be the same
                 while endNode == startNode:
@@ -172,12 +175,25 @@ if __name__ == "__main__":
                 addPattern(G, diamond)
         with open(f"graphplots/real_diamonds/{i}.json", "w") as outfile:
             json.dump(diamonds, outfile, indent=8)
-        create_plot(dd, list(diamonds), "#00ffff", "created-diamonds_" + str(i))
+        # create_plot(
+        #     dd,
+        #     list(diamonds),
+        #     "#00ffff",
+        #     "graphplots/real_diamonds/created-diamonds_" + str(i),
+        # )
+        # with open(f"graphplots/real_graph/{i}.json", "w") as outfile:
+        #     json.dump(list(G.nodes), outfile, indent=8)
+        # create_plot(
+        #     G, list(G.nodes), "#00ffff", "graphplots/real_graph/created-graph_" + str(i)
+        # )
         # save graph in pickle file
         if graph_number <= int(num_graphs * 0.85):
             nx.write_gpickle(G, "train_data/dataset_%s_D.gpickle" % (graph_number))
         else:
             nx.write_gpickle(G, "test_data/dataset_%s_D.gpickle" % (graph_number))
         graph_number += 1
-        # print(graph_number)
+        labels = return_labels(G)
+        # print(f"labels: \n {labels}")
+        A_clustered = get_A_clustered(G)
+        # print(f"A_clustered: \n {A_clustered}")
 # print("graphs completed: " + str(graph_number))

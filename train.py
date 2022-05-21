@@ -19,55 +19,23 @@ warnings.filterwarnings("ignore")
 """
 In this script, model&data will be loaded and model will be trained accordingly.
 """
-with open("logger.txt", "w") as outfile:
-    outfile.write("train.py -> Imports are successful.")
+# with open("logger.txt", "w") as outfile:
+#     outfile.write("train.py -> Imports are successful.")
 
 # onlyfiles = [f for f in listdir("data") if isfile(join("data", f))]
 # onlyfiles = get_data(graph_data, "train_data")
-# def return_labels(G):
-#     """Returning labels for training."""
-#     nodes = G.nodes
-#     labels = nx.get_node_attributes(G, "suspicious")
-#     y = []
-#     for label in labels.values():
-#         y.append(label)
-#     y = np.asarray(y)
-#     y = torch.from_numpy(y)
-#     y = y.type(torch.long)
-#     return y
+# def get_adjacency_matrix(G):
+#     """Returning adjacency matrix as node features."""
+#     A = nx.adjacency_matrix(G)
+#     A = A.todense()
+#     A = np.asarray(A)
+#     return A
 
 
-def get_adjacency_matrix(G):
-    """Returning adjacency matrix as node features."""
-    A = nx.adjacency_matrix(G)
-    A = A.todense()
-    A = np.asarray(A)
-    return A
-
-
-def get_data_from_graph(G):
-    """Getting data for pytorch from networkx graph"""
-    data = from_networkx(G)
-    return data
-
-
-# @torch.no_grad()
-# def test(data):
-#     # model.eval()
-#     out, accs = model(data.x, data.edge_index), []
-#     acc = float((out.argmax(-1) == data.y).sum() / data.y.shape[0])
-#     # accs.append(acc)
-#     return acc
-
-
-# def train(data):
-#     model.train()
-#     # optimizer.zero_grad()
-#     out = model(data.x, data.edge_index)
-#     loss = F.nll_loss(out, data.y)
-#     # loss.backward()
-#     # optimizer.step()
-#     return loss
+# def get_data_from_graph(G):
+#     """Getting data for pytorch from networkx graph"""
+#     data = from_networkx(G)
+#     return data
 
 
 if __name__ == "__main__":
@@ -92,6 +60,7 @@ if __name__ == "__main__":
     def train():
         total_loss = total_examples = total_acc = 0
         for data in train_loader:
+            model.train()
             data = data.to(device)
             optimizer.zero_grad()
             out = model(data.x, data.edge_index)
@@ -112,14 +81,12 @@ if __name__ == "__main__":
         nll = []
         accs_ = []
         for data in loader:
+            model.eval()
             data = data.to(device)
             out = model(data.x, data.edge_index)
             accs_.append(float((out.argmax(-1) == data.y).sum() / data.y.shape[0]))
-            # mse.append(F.mse_loss(out, data.y, reduction="none").cpu())
             nll.append(F.nll_loss(out, data.y).cpu())
         return float(sum(nll) / len(nll)), float(sum(accs_) / len(accs_))
-        # return float(torch.cat(nll, dim=0).mean())
-        # return float(torch.cat(mse, dim=0).mean().sqrt())
 
     for epoch in range(1, 201):
         train_loss, train_acc = train()
@@ -131,43 +98,3 @@ if __name__ == "__main__":
             f"Val_loss: {val_loss:.4f} Val_acc: {val_acc: .4f} "
             f"Test_loss: {test_loss:.4f} Test_acc: {test_acc: .4f} "
         )
-    # # path_state_dict = "models/gat_100_2_state_dict"
-    # # model = GAT(100, 2)
-    # path_state_dict = "models/gcn_100_2_state_dict"
-    # model = GCN(500, 2)
-    # # model = torch.load("models/gat_100_2")
-    # if os.path.isfile(path_state_dict):
-    #     print("State Dict exists")
-    #     model.load_state_dict(torch.load(path_state_dict))
-    # else:
-    #     pass
-    # print(f"Model: \n {model}")
-    # optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
-    # # accuracy_graph = {}
-
-    # for epoch in range(0, 10):
-    #     optimizer.zero_grad()
-    #     # print(f"Number of data: {i}")
-    #     # print("------------------------")
-    #     # accuracy_epoch = []
-    #     acc_ = 0
-    #     count = 0
-    #     for i, data in zip(range(len(data_list)), data_list):
-    #         data = data.to(device)
-    #         loss = train(data)
-    #         acc_ = acc_ + test(data)
-    #         count = count + 1
-    #     loss.backward()
-    #     optimizer.step()
-    #     acc_ = acc_ / count
-    #     print(f"EPOCH: : {epoch}")
-    #     print(f"accuracy: {acc_} \n")
-    #     # if epoch % 100 == 0:
-    #     #     print(f"EPOCH: {epoch}")
-    #     #     print(f"accuracy: {train_acc[0]} \n")
-    #     # accuracy_epoch.append(train_acc[0])
-    # #    accuracy_graph[i] = accuracy_epoch
-    # # print(json.dumps(accuracy_graph, sort_keys=True, indent=4))
-    # # torch.save(model, "models/gat_100_2")
-    # model.eval()
-    # torch.save(model.state_dict(), path_state_dict)

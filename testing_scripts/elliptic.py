@@ -16,10 +16,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Load Dataframe
-df_edge = pd.read_csv("elliptic_bitcoin_dataset/elliptic_txs_edgelist.csv")
-df_class = pd.read_csv("elliptic_bitcoin_dataset/elliptic_txs_classes.csv")
+df_edge = pd.read_csv("elliptic/elliptic_bitcoin_dataset/elliptic_txs_edgelist.csv")
+df_class = pd.read_csv("elliptic/elliptic_bitcoin_dataset/elliptic_txs_classes.csv")
 df_features = pd.read_csv(
-    "elliptic_bitcoin_dataset/elliptic_txs_features.csv", header=None
+    "elliptic/elliptic_bitcoin_dataset/elliptic_txs_features.csv", header=None
 )
 
 # Setting Column name
@@ -91,20 +91,26 @@ df_edge_time_fin = df_edge_time[["txId1", "txId2", "time step"]].rename(
 )
 
 df_features.drop(columns=["time step"]).to_csv(
-    "elliptic_bitcoin_dataset_cont/elliptic_txs_features.csv", index=False, header=None
+    "elliptic/elliptic_bitcoin_dataset_cont/elliptic_txs_features.csv",
+    index=False,
+    header=None,
 )
 df_class.rename(columns={"txId": "nid", "class": "label"})[
     ["nid", "label"]
 ].sort_values(by="nid").to_csv(
-    "elliptic_bitcoin_dataset_cont/elliptic_txs_classes.csv", index=False, header=None
+    "elliptic/elliptic_bitcoin_dataset_cont/elliptic_txs_classes.csv",
+    index=False,
+    header=None,
 )
 df_features[["id", "time step"]].rename(columns={"id": "nid", "time step": "time"})[
     ["nid", "time"]
 ].sort_values(by="nid").to_csv(
-    "elliptic_bitcoin_dataset_cont/elliptic_txs_nodetime.csv", index=False, header=None
+    "elliptic/elliptic_bitcoin_dataset_cont/elliptic_txs_nodetime.csv",
+    index=False,
+    header=None,
 )
 df_edge_time_fin[["source", "target", "time"]].to_csv(
-    "elliptic_bitcoin_dataset_cont/elliptic_txs_edgelist_timed.csv",
+    "elliptic/elliptic_bitcoin_dataset_cont/elliptic_txs_edgelist_timed.csv",
     index=False,
     header=None,
 )
@@ -218,7 +224,7 @@ model = GCN(num_node_features=data.num_node_features, hidden_channels=[100])
 model.to(device)
 
 patience = 50
-lr = 0.001
+lr = 0.01
 epoches = 1000
 
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)

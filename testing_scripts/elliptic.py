@@ -12,7 +12,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import warnings
-
+import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 
 # Load Dataframe
@@ -225,9 +225,10 @@ model.to(device)
 
 patience = 50
 lr = 0.01
-epoches = 1000
+weight_decay = 5e-4
+epoches = 1000 #Default: 1000
 
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay = weight_decay)
 criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.7, 0.3]).to(device))
 
 
@@ -238,9 +239,9 @@ if1 = []
 precisions = []
 recalls = []
 iterations = []
+f1_list = []
 
 for epoch in range(epoches):
-
     model.train()
     train_loss = 0
     for data in train_loader:
@@ -254,7 +255,7 @@ for epoch in range(epoches):
         optimizer.step()
     train_loss /= len(train_loader.dataset)
 
-    if (epoch + 1) % 50 == 0:
+    if (epoch + 1) % 10 == 0: #Default: 50
         model.eval()
         ys, preds = [], []
         val_loss = 0
@@ -277,13 +278,40 @@ for epoch in range(epoches):
         iterations.append(epoch + 1)
         train_losses.append(train_loss)
         val_losses.append(val_loss)
-        if1.append(f1[0])
-        accuracies.append(mf1)
         precisions.append(precision[0])
         recalls.append(recall[0])
+        if1.append(f1[0])
+        f1_list.append(mf1)
+        #accuracies.append(mf1)
 
-        print(
-            "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision: {:.4f}, Recall: {:.4f}, Illicit f1: {:.4f}, F1: {:.4f}".format(
-                epoch + 1, train_loss, val_loss, precision[0], recall[0], f1[0], mf1
+        if (epoch + 1) % 50 == 0: #Default: 50
+            print(
+                "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision: {:.4f}, Recall: {:.4f}, Illicit f1: {:.4f}, F1: {:.4f}".format(
+                    epoch + 1, train_loss, val_loss, precision[0], recall[0], f1[0], mf1
+                )
             )
-        )
+            
+    ########## Create DataFrames #########################################
+    loss_results = pd.DataFrame(columns = ['Iteration', 'Train_Loss', 'Val_Loss'])
+    metrics_results = pd.DataFrame(columns = ['Iteration', 'Precision', 'Recall', 'Illicit_F1', 'F1'])
+
+    ########## Transfrom Lists into Dataframes ############################
+    loss_results['Iteration'] = iterations
+    loss_results['Train_Loss'] = train_losses
+    loss_results['Val_Loss'] = val_losses
+
+    metrics_results['Iteration'] = iterations
+    metrics_results['Precision'] = precisions
+    metrics_results['Recall'] = recalls
+    metrics_results['Illicit_F1'] = if1
+    metrics_results['F1'] = f1_list
+
+    ######## Plot Dataframe Columns vs Iterations Column ####################
+    loss_results.plot(x = 'Iteration', y = ['Train_Loss', 'Val_Loss'])
+    plt.savefig('loss_results.png')
+
+    metrics_results.plot()
+    metrics_results.plot(x = 'Iteration', y = ['Precision', 'Recall', 'Illicit_F1', 'F1'])
+    plt.savefig('metrics_results.png')
+    ##################################################################################################################################
+    

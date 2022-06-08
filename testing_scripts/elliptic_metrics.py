@@ -1,3 +1,4 @@
+import matplotlib
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
@@ -8,12 +9,37 @@ import pandas as pd
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import warnings
-import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
+
+class GCN(torch.nn.Module):
+    def __init__(self, num_node_features, hidden_channels, use_skip=False):
+        super(GCN, self).__init__()
+        self.conv1 = GCNConv(num_node_features, hidden_channels[0])
+        self.conv2 = GCNConv(hidden_channels[0], 2)
+        self.use_skip = use_skip
+        if self.use_skip:
+            self.weight = torch.nn.init.xavier_normal_(
+                torch.nn.Parameter(torch.Tensor(num_node_features, 2))
+            )
+
+    def forward(self, data):
+        x = self.conv1(data.x, data.edge_index)
+        x = x.relu()
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.conv2(x, data.edge_index)
+        if self.use_skip:
+            x = F.softmax(x + torch.matmul(data.x, self.weight), dim=-1)
+        else:
+            x = F.softmax(x, dim=-1)
+        return x
+
+    def embed(self, data):
+        x = self.conv1(data.x, data.edge_index)
+        return x
 
 # Load Dataframe
 df_edge = pd.read_csv("elliptic/elliptic_bitcoin_dataset/elliptic_txs_edgelist.csv")
@@ -185,61 +211,34 @@ for i in range(49):
         data = Data(x=x, edge_index=edge_index, test_mask=mask, y=y)
         test_dataset.append(data)
 
+######## TRAIN ######################
 train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 print(f"train_loader: \n {train_loader}")
 print(f"test_loader: \n {test_loader}")
 
-
-class GCN(torch.nn.Module):
-    def __init__(self, num_node_features, hidden_channels, use_skip=False):
-        super(GCN, self).__init__()
-        self.conv1 = GCNConv(num_node_features, hidden_channels[0])
-        self.conv2 = GCNConv(hidden_channels[0], 2)
-        self.use_skip = use_skip
-        if self.use_skip:
-            self.weight = torch.nn.init.xavier_normal_(
-                torch.nn.Parameter(torch.Tensor(num_node_features, 2))
-            )
-
-    def forward(self, data):
-        x = self.conv1(data.x, data.edge_index)
-        x = x.relu()
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.conv2(x, data.edge_index)
-        if self.use_skip:
-            x = F.softmax(x + torch.matmul(data.x, self.weight), dim=-1)
-        else:
-            x = F.softmax(x, dim=-1)
-        return x
-
-    def embed(self, data):
-        x = self.conv1(data.x, data.edge_index)
-        return x
-
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = GCN(num_node_features=data.num_node_features, hidden_channels=[100])
 model.to(device)
 
 patience = 50
-lr = 0.01 #Default mit 0.01
-weight_decay = 0 #5e-4
-epoches = 1 #Default: 1000
+lr = 0.01
+weight_decay = 0
+epoches = 600 #Default: 1000
 
-optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.7, 0.3]).to(device))
-
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay = weight_decay)
+criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([9.245, 1]).to(device))
 
 train_losses = []
 val_losses = []
 accuracies = []
-if1 = []
-precisions = []
-recalls = []
+f1_illicit = []
+precisions_illicit = []
+precisions_licit = []
+recalls_illicit = []
+accuracies = []
 iterations = []
-f1_list = []
 
 for epoch in range(epoches):
     model.train()
@@ -253,69 +252,76 @@ for epoch in range(epoches):
         loss.backward()
         train_loss += loss.item() * data.num_graphs
         optimizer.step()
+        test_data = data
     train_loss /= len(train_loader.dataset)
 
-    #if (epoch + 1) % 50 == 0: #Default: 50
-    model.eval()
-    ys, preds = [], []
-    val_loss = 0
-    for data in test_loader:
-        data = data.to(device)
-        out = model(data)
-        loss = criterion(out[data.test_mask], data.y[data.test_mask])
-        val_loss += loss.item() * data.num_graphs
-        _, pred = out[data.test_mask].max(dim=1)
-        ys.append(data.y[data.test_mask].cpu())
-        preds.append(pred.cpu())
-        print(data.y) #####################################
 
-    y, pred = torch.cat(ys, dim=0).numpy(), torch.cat(preds, dim=0).numpy()
-    val_loss /= len(test_loader.dataset)
-    f1 = f1_score(y, pred, average=None)
-    mf1 = f1_score(y, pred, average="micro")
-    precision = precision_score(y, pred, average=None)
-    recall = recall_score(y, pred, average=None)
-    accuracy = accuracy_score(y, pred)
+    if (epoch + 1) % 1 == 0: #Default: 50
+        model.eval()
+        ys, preds = [], []
+        val_loss = 0
+        for data in test_loader:
+            data = data.to(device)
+            out = model(data)
+            loss = criterion(out[data.test_mask], data.y[data.test_mask])
+            val_loss += loss.item() * data.num_graphs
+            _, pred = out[data.test_mask].max(dim=1)
+            ys.append(data.y[data.test_mask].cpu())
+            preds.append(pred.cpu())
 
-    iterations.append(epoch + 1)
-    train_losses.append(train_loss)
-    val_losses.append(val_loss)
-    precisions.append(precision[0])
-    recalls.append(recall[0])
-    if1.append(f1[0])
-    f1_list.append(mf1)
-    accuracies.append(accuracy)
-    print(y)###############
+#Compute Losses & Metrics in current epoch
+        y, pred = torch.cat(ys, dim=0).numpy(), torch.cat(preds, dim=0).numpy()
+        val_loss /= len(test_loader.dataset)
 
-    if (epoch + 1) % 50 == 0: #Default: 50
-        print(
-            "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision: {:.4f}, Recall: {:.4f}, Illicit f1: {:.4f}, F1: {:.4f}, Acc: {:.4f}".format(
-                epoch + 1, train_loss, val_loss, precision[0], recall[0], f1[0], mf1, accuracy
+        if1 = f1_score(y, pred, average='binary', pos_label = 0)
+        precision_illicit = precision_score(y, pred, average='binary', pos_label = 0)
+        precision_licit = precision_score(y, pred, average='binary', pos_label = 1)
+        recall_illicit = recall_score(y, pred, average='binary', pos_label = 0)
+        acc = accuracy_score(y, pred)
+        
+#Append metrics to metrics of past epochs
+        
+        if (epoch + 1) % 2 == 0:
+            iterations.append(epoch + 1)
+            train_losses.append(train_loss)
+            val_losses.append(val_loss)
+            f1_illicit.append(if1)
+            precisions_illicit.append(precision_illicit)
+            precisions_licit.append(precision_licit)
+            recalls_illicit.append(recall_illicit)
+            accuracies.append(acc)
+
+        if (epoch + 1) % 50 == 0: #Default: 50
+            print(
+                "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision_Illicit: {:.4f}, Recall_Illicit {:.4f}, F1_Illicit: {:.4f}, Accuracy: {:.4f}".format(
+                    epoch + 1, train_loss, val_loss, precision_illicit, recall_illicit, if1, acc
+                )
             )
-        )
-            
-########## Create DataFrames #########################################
+                
+#Create DataFrames
 loss_results = pd.DataFrame(columns = ['Iteration', 'Train_Loss', 'Val_Loss'])
-metrics_results = pd.DataFrame(columns = ['Iteration', 'Precision', 'Recall', 'Illicit_F1', 'F1', 'Accuracy'])
+metrics_results = pd.DataFrame(columns = ['Iteration', 'Precision_Licit', 'Precision_Illicit', 'Recall_Illicit', 'F1_Illicit', 'Accuracy'])
 
-########## Transfrom Lists into Dataframes ############################
+#Collect & Store Losses in Loss-Results-DataFrame
 loss_results['Iteration'] = iterations
 loss_results['Train_Loss'] = train_losses
 loss_results['Val_Loss'] = val_losses
 
+#Collect & Store Metrics in Metrics-Results-DataFrame
 metrics_results['Iteration'] = iterations
-metrics_results['Precision'] = precisions
-metrics_results['Recall'] = recalls
-metrics_results['Illicit_F1'] = if1
-metrics_results['F1'] = f1_list
+metrics_results['Precision_Illicit'] = precisions_illicit
+metrics_results['Precision_Licit'] = precisions_licit
+metrics_results['Recall_Illicit'] = recalls_illicit
+#metrics_results['Recall_Licit'] = recalls_licit
+metrics_results['F1_Illicit'] = f1_illicit
 metrics_results['Accuracy'] = accuracies
-
-######## Plot Dataframe Columns vs Iterations Column ####################
+#Plot Loss-Results-DataFrame Columns vs Iterations Column
 loss_results.plot(x = 'Iteration', y = ['Train_Loss', 'Val_Loss'])
 plt.savefig('loss_results.png')
 
-metrics_results.plot()
-metrics_results.plot(x = 'Iteration', y = ['Precision', 'Recall', 'Illicit_F1', 'F1', 'Accuracy'])
+#plt.gca().set_color_cycle(['magenta', 'blue', 'green', 'red', 'orange'])
+matplotlib.rcParams['axes.prop_cycle'] = matplotlib.cycler(color=['tab:red', 'tab:blue', 'tab:green', 'tab:purple', 'tab:orange']) 
+
+#Plot Metrics-Results-DataFrame Columns vs Iterations Column 
+metrics_results.plot(x = 'Iteration', y = ['Precision_Licit', 'Precision_Illicit', 'Recall_Illicit', 'F1_Illicit', 'Accuracy'])
 plt.savefig('metrics_results.png')
-##################################################################################################################################
-    

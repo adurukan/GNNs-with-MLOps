@@ -4,4 +4,4 @@ try.py
 cml.yaml
 1.png
 visualize.py
-elliptic/*
+testing_scripts/elliptic/*

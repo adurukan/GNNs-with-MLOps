@@ -1,7 +1,7 @@
 import matplotlib
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GATConv
 import torch_geometric.transforms as T
 from torch_geometric.datasets import EllipticBitcoinDataset
 import numpy as np
@@ -211,6 +211,31 @@ for i in range(49):
         data = Data(x=x, edge_index=edge_index, test_mask=mask, y=y)
         test_dataset.append(data)
 
+class GAT(torch.nn.Module):
+    def __init__(self, num_node_features, hidden_channels): 
+        super().__init__()
+
+        self.conv1 = GATConv(num_node_features, 50, heads=10, dropout=0.2)
+        self.conv2 = GATConv(50 * 10, 10, heads=8, dropout=0.2)
+        self.conv3 = GATConv(10 * 8, 10, heads=4, dropout=0.2)
+        self.conv4 = GATConv(10 * 4, 10, heads=1, dropout=0.2)
+        self.conv5 = GATConv(10 * 1, hidden_channels[0], heads=1, concat=False, dropout=0.5)
+
+    def forward(self, x, edge_index):
+        
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.elu(self.conv1(x, edge_index))
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.elu(self.conv2(x, edge_index))
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.elu(self.conv3(x, edge_index))
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = F.elu(self.conv4(x, edge_index))
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv5(x, edge_index)
+        return F.log_softmax(x, dim=1) 
+
+
 ######## TRAIN ######################
 train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -219,16 +244,18 @@ print(f"train_loader: \n {train_loader}")
 print(f"test_loader: \n {test_loader}")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = GCN(num_node_features=data.num_node_features, hidden_channels=[100])
+#model = GCN(num_node_features=data.num_node_features, hidden_channels=[100])
+model = GAT(num_node_features=data.num_node_features, hidden_channels=[2])
 model.to(device)
 
+#Parameters
 patience = 50
-lr = 0.01
+lr = 0.001
 weight_decay = 0
-epoches = 600 #Default: 1000
+epoches = 750 #Default: 1000
 
-optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay = weight_decay)
-criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([9.245, 1]).to(device))
+optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay = weight_decay)
+criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1, 0.5]).to(device))  #[9.245, 1]
 
 train_losses = []
 val_losses = []
@@ -246,7 +273,8 @@ for epoch in range(epoches):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        out = model(data)
+        #out = model(data)
+        out = model(data.x, data.edge_index)
         loss = criterion(out[data.train_mask], data.y[data.train_mask])
         _, pred = out[data.train_mask].max(dim=1)
         loss.backward()
@@ -255,48 +283,48 @@ for epoch in range(epoches):
         test_data = data
     train_loss /= len(train_loader.dataset)
 
-
-    if (epoch + 1) % 1 == 0: #Default: 50
-        model.eval()
-        ys, preds = [], []
-        val_loss = 0
-        for data in test_loader:
-            data = data.to(device)
-            out = model(data)
-            loss = criterion(out[data.test_mask], data.y[data.test_mask])
-            val_loss += loss.item() * data.num_graphs
-            _, pred = out[data.test_mask].max(dim=1)
-            ys.append(data.y[data.test_mask].cpu())
-            preds.append(pred.cpu())
+#BeginIf
+    #if (epoch + 1) % 1 == 0: #Default: 50
+    model.eval()
+    ys, preds = [], []
+    val_loss = 0
+    for data in test_loader:
+        data = data.to(device)
+        #out = model(data)
+        out = model(data.x, data.edge_index)
+        loss = criterion(out[data.test_mask], data.y[data.test_mask])
+        val_loss += loss.item() * data.num_graphs
+        _, pred = out[data.test_mask].max(dim=1)
+        ys.append(data.y[data.test_mask].cpu())
+        preds.append(pred.cpu())
 
 #Compute Losses & Metrics in current epoch
-        y, pred = torch.cat(ys, dim=0).numpy(), torch.cat(preds, dim=0).numpy()
-        val_loss /= len(test_loader.dataset)
+    val_loss /= len(test_loader.dataset)
+    y, pred = torch.cat(ys, dim=0).numpy(), torch.cat(preds, dim=0).numpy()
 
-        if1 = f1_score(y, pred, average='binary', pos_label = 0)
-        precision_illicit = precision_score(y, pred, average='binary', pos_label = 0)
-        precision_licit = precision_score(y, pred, average='binary', pos_label = 1)
-        recall_illicit = recall_score(y, pred, average='binary', pos_label = 0)
-        acc = accuracy_score(y, pred)
-        
+    if1 = f1_score(y, pred, average='binary', pos_label = 0)
+    precision_illicit = precision_score(y, pred, average='binary', pos_label = 0)
+    precision_licit = precision_score(y, pred, average='binary', pos_label = 1)
+    recall_illicit = recall_score(y, pred, average='binary', pos_label = 0)
+    acc = accuracy_score(y, pred)
+    
 #Append metrics to metrics of past epochs
-        
-        if (epoch + 1) % 2 == 0:
-            iterations.append(epoch + 1)
-            train_losses.append(train_loss)
-            val_losses.append(val_loss)
-            f1_illicit.append(if1)
-            precisions_illicit.append(precision_illicit)
-            precisions_licit.append(precision_licit)
-            recalls_illicit.append(recall_illicit)
-            accuracies.append(acc)
+    iterations.append(epoch + 1)
+    train_losses.append(train_loss)
+    val_losses.append(val_loss)
+    f1_illicit.append(if1)
+    precisions_illicit.append(precision_illicit)
+    precisions_licit.append(precision_licit)
+    recalls_illicit.append(recall_illicit)
+    accuracies.append(acc)
 
-        if (epoch + 1) % 50 == 0: #Default: 50
-            print(
-                "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision_Illicit: {:.4f}, Recall_Illicit {:.4f}, F1_Illicit: {:.4f}, Accuracy: {:.4f}".format(
-                    epoch + 1, train_loss, val_loss, precision_illicit, recall_illicit, if1, acc
-                )
+    if (epoch + 1) % 50 == 0: #Default: 50
+        print(
+            "Epoch: {:02d}, Train_Loss: {:.4f}, Val_Loss: {:.4f}, Precision_Illicit: {:.4f}, Recall_Illicit {:.4f}, F1_Illicit: {:.4f}, Accuracy: {:.4f}".format(
+                epoch + 1, train_loss, val_loss, precision_illicit, recall_illicit, if1, acc
             )
+        )
+#EndIf
                 
 #Create DataFrames
 loss_results = pd.DataFrame(columns = ['Iteration', 'Train_Loss', 'Val_Loss'])
@@ -312,9 +340,11 @@ metrics_results['Iteration'] = iterations
 metrics_results['Precision_Illicit'] = precisions_illicit
 metrics_results['Precision_Licit'] = precisions_licit
 metrics_results['Recall_Illicit'] = recalls_illicit
-#metrics_results['Recall_Licit'] = recalls_licit
 metrics_results['F1_Illicit'] = f1_illicit
 metrics_results['Accuracy'] = accuracies
+
+#Set Plot-Quality
+matplotlib.rcParams['figure.dpi'] = 600
 #Plot Loss-Results-DataFrame Columns vs Iterations Column
 loss_results.plot(x = 'Iteration', y = ['Train_Loss', 'Val_Loss'])
 plt.savefig('loss_results.png', dpi=600)

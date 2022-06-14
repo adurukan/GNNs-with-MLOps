@@ -1,0 +1,33 @@
+{
+    "node_id": "Wallet_X",
+    "node": [
+        {
+            "Wallet_Y": "in"
+        },
+        {
+            "Wallet_Z": "out"
+        },
+        {
+            "Wallet_M": "in"
+        }
+    ],
+    "labels": {
+        "FA_1_case_1": true,
+        "FA_1_case_2": false
+    },
+    "transaction_val": [
+        123,
+        456,
+        789
+    ],
+    "transaction_time": [
+        1654119683,
+        1654119702,
+        1654119711
+    ],
+    "further_attributes": [
+        "asd",
+        "asd",
+        "asd"
+    ]
+}

@@ -13,6 +13,6 @@ class new_json:
         "labels", {"FA_1_case_1": bool, "FA_1_case_2": bool}
     )
 
-    transaction_val: List[Union[int, float]]
-    transaction_time: List[Union[int, float]]
+    transaction_val: List[Union[int, float, str]]
+    transaction_time: List[Union[int, float, str]]
     further_attributes: Optional[List[Union[str, int]]]

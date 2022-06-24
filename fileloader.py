@@ -134,7 +134,7 @@ class FileLoader:
     def write(self, output_fn: str):
         with open(output_fn, "w") as outfile:
             for updated_json in self.updated_jsons:
-                json.dump(updated_json, outfile, indent=2)
+                json.dump(updated_json, outfile)
                 outfile.write("\n")
 
     def convert_value(self, unit: str, factor: float) -> None:

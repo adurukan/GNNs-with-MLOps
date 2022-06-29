@@ -1,0 +1,16 @@
+{"node_id": "0","node": [{"1": "out"}, {"2": "out"}, {"3": "out"}],"labels": {"FA_1_case_1": true, "FA_1_case_2": false},"transaction_val": [9000,5000,6000],"transaction_time": [1655244000,1655262000,1655413200]}
+{"node_id": "1","node": [{"0": "in"}, {"4": "out"}, {"5": "out"}],"labels": {"FA_1_case_1": false, "FA_1_case_2": false},"transaction_val": [9000,15000,1000],"transaction_time": [1655244000,1655330400,1655416800]}
+{"node_id": "2","node": [{"0": "in"}],"labels": {"FA_1_case_1": false, "FA_1_case_2": false}, "transaction_val": [5000], "transaction_time": [1655262000]}
+{"node_id": "3","node": [{"0": "in"},{"6": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [6000, 5000], "transaction_time": [1655413200, 1655503200]}
+{"node_id": "4","node": [{"1": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [15000],"transaction_time": [1655330400]}
+{"node_id": "5","node": [{"1": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [1000],"transaction_time": [1655416800]}
+{"node_id": "6","node": [{"3": "in"},{"9": "out"},{"11": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [5000,5000,8000],"transaction_time": [1655503200,1655416800,1655719200]}
+{"node_id": "7","node": [{"9": "out"},{"9": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [1000,2000],"transaction_time": [1655503200,1655506800]}
+{"node_id": "8","node": [{"9": "out"}, {"9": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [3000, 4000],"transaction_time": [1655593200,1655676000]}
+{"node_id": "9","node": [{"6": "in"},{"7": "in"},{"7": "in"},{"8": "in"},{"8": "in"},{"12": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": true},"transaction_val": [5000,1000,2000,3000,4000,10000],"transaction_time": [1655416800,1655503200,1655506800,1655593200,1655676000,1655679600]}
+{"node_id": "10","node": [{"11": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [9000],"transaction_time": [1655676000]}
+{"node_id": "11","node": [{"6": "in"},{"10": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": true},"transaction_val": [8000,9000],"transaction_time": [1655719200,1655676000]}
+{"node_id": "12","node": [{"9": "in"},{"13": "out"},{"13": "out"},{"14": "out"},{"15": "out"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [10000,5000,2000,20000,2000],"transaction_time": [1655679600,1655676000,1655935200,1655762400,1655773200]}
+{"node_id": "13","node": [{"12": "in"},{"12": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [5000,2000],"transaction_time": [1655676000,1655935200]}
+{"node_id": "14","node": [{"12": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [20000],"transaction_time": [1655762400]}
+{"node_id": "15","node": [{"12": "in"}],"labels": {"FA_1_case_1": false,"FA_1_case_2": false},"transaction_val": [2000],"transaction_time": [1655773200]}

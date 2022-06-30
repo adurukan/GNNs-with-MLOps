@@ -48,7 +48,7 @@ class FA1_detection:
 
     def create_mask(self, df):
         # filter out every transation that is over 10000
-        df = df[df["transaction_val"] < 10000]
+        df = df[(df["transaction_val"] < 10000) & (df["transaction_val"] != 0.00)]
 
         # filter out single transation
         tmp = (df.groupby(["node_id","direction"]).count() == 1).neighbor_nodes.reset_index().rename(columns={"neighbor_nodes":"single_trans"})

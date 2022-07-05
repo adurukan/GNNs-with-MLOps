@@ -75,7 +75,7 @@ class FA1_detection:
 
         return df_mask
     
-    def thresholds_FA1_time_jump(self, df_node, start_index) -> bool:
+    def detection_FA1(self, df_node, start_index) -> bool:
         node_flag = False
         end_index = df_node.shape[0]
         time_window_start = df_node['transaction_time'].values[start_index]
@@ -99,13 +99,13 @@ class FA1_detection:
                 node_flag = self.thresholds_FA1_time_jump(df_node, start_index)
         return node_flag
 
-    def flagger_FA1_time_jump(self, df_candidates):
+    def flagger_FA1(self, df_candidates):
         start_index = 0
         node_flags = {}
         #loop over all candidates
         for node in df_candidates['node_id'].unique().tolist():
             df_node = df_candidates[df_candidates['node_id'] == node].sort_values(by='transaction_time').reset_index(drop=True)
-            node_flag = self.thresholds_FA1_time_jump(df_node, start_index)
+            node_flag = self.detection_FA1(df_node, start_index)
             node_flags[node] = node_flag
         return node_flags
 
@@ -118,8 +118,8 @@ if __name__ == "__main__":
     case1_candidates = df_mask[df_mask['mask_2_case_1'] == True]
     case2_candidates = df_mask[df_mask['mask_2_case_2'] == True]
     
-    case1_flags = fa1_detection.flagger_FA1_time_jump(case1_candidates)
-    case2_flags = fa1_detection.flagger_FA1_time_jump(case2_candidates)
+    case1_flags = fa1_detection.flagger_FA1(case1_candidates)
+    case2_flags = fa1_detection.flagger_FA1(case2_candidates)
     print(case1_flags)
     print(case2_flags)
 

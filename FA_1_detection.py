@@ -96,7 +96,7 @@ class FA1_detection:
             if start_index == end_index:
                 node_flag = False
             else:
-                node_flag = self.thresholds_FA1_time_jump(df_node, start_index)
+                node_flag = self.detection_FA1(df_node, start_index)
         return node_flag
 
     def flagger_FA1(self, df_candidates):

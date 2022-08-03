@@ -7,14 +7,14 @@ from torch_geometric.data import Data
 from torch_geometric.nn import GATConv
 from torch_geometric.datasets import Planetoid
 from torch_geometric.utils import from_networkx
-from helper import create_plot, return_labels, get_A_clustered
+from helper import return_labels, get_A_clustered
 import torch_geometric.transforms as T
 import pickle
 import networkx as nx
 from networkx.generators.random_graphs import erdos_renyi_graph
 from random import randint
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join    
 import json
 
 # from visualize import create_plot
@@ -65,6 +65,7 @@ def addedges(G, k):
                 added_edge.append(edgelistG[j])
         G.add_edges_from(added_edge)
     nx.set_node_attributes(G, 0, "suspicious")
+    
     return G
 
 
@@ -123,20 +124,10 @@ def addPattern(G, pattern):
     G.update(pattern)
 
 
-# def return_labels(G):
-#     nodes = G.nodes
-#     labels = nx.get_node_attributes(G, "suspicious")
-#     y = []
-#     for label in labels.values():
-#         y.append(label)
-#     y = np.asarray(y)
-#     return y
-
-
 if __name__ == "__main__":
     # initializing various variables: number of graphs to be generated, current graph number, max depth of paths within diamond
     # useBackground: boolean variable to decide whether the diamonds should consist of completely new nodes (False) or also use nodes already in the background (True)
-    num_graphs = 100
+    num_graphs = 200
     graph_number = 0
     useBackground = True
     addDiamonds = True
@@ -151,16 +142,16 @@ if __name__ == "__main__":
         dd = nx.MultiDiGraph()
         # generate new random number for number of diamonds and nodes in total
         num_diamonds = randint(20, 30)
-        num_nodes = 200
+        num_nodes = 500
         # Create Background Graph
-        G_er = erdosrenyi_generator(n=num_nodes, p=3 / num_nodes)
-        G = addedges(G_er, k=3)
+        G_er = erdosrenyi_generator(n=num_nodes, p=3/num_nodes)
+        G = addedges(G_er, k=2)
 
         if addDiamonds:
             # run loop as many times as the number of Diamonds to be generated
             for d in range(num_diamonds):
                 # generate new random numbers for split degree and start and end nodes
-                splitDegree = 1
+                splitDegree = 3
                 startNode = randint(0, num_nodes - 1)
                 endNode = randint(0, num_nodes - 1)
                 # incase start and end happen to be the same
@@ -173,8 +164,8 @@ if __name__ == "__main__":
                 diamonds.extend(diamond.nodes)
                 dd = nx.compose(dd, diamond)
                 addPattern(G, diamond)
-        with open(f"graphplots/real_diamonds/{i}.json", "w") as outfile:
-            json.dump(diamonds, outfile, indent=8)
+        # with open(f"graphplots/real_diamonds/{i}.json", "w") as outfile:
+        #     json.dump(diamonds, outfile, indent=8)
         # create_plot(
         #     dd,
         #     list(diamonds),

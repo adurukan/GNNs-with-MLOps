@@ -1,31 +1,29 @@
 import torch
 import torch.nn.functional as F
+from torch.nn import Linear
 from torch_geometric.nn import GCNConv
 import sys
 
 
 class GCN(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
+    def __init__(self, out_channels):
 
-        self.conv1 = GCNConv(in_channels, 100)
-        self.conv2 = GCNConv(100, 32)
-        self.conv3 = GCNConv(32, out_channels)
+        super().__init__()
+        self.conv1 = GCNConv(-1, 256)
+        self.conv2 = GCNConv(256, 128)
+        self.conv3 = GCNConv(128, 56)
+        self.conv4 = GCNConv(56, 32)
+        self.linear = Linear(32, out_channels)
 
     def forward(self, x, edge_index):
-        x = F.relu(self.conv1(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = F.relu(self.conv2(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = self.conv3(x, edge_index)
-        return F.log_softmax(x, dim=-1)
 
+        x = F.leaky_relu(self.conv1(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv2(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv3(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv4(x, edge_index), 0.1)
+        
+        return F.softmax(self.linear(x))
 
-# def create_save_model():
-#     in_channels = int(sys.argv[1])
-#     out_channels = int(sys.argv[2])
-#     model = GAT(in_channels=in_channels, out_channels=out_channels)
-#     torch.save(model, f"models/gat_{in_channels}_{out_channels}")
-
-
-# create_save_model()

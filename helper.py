@@ -1,3 +1,5 @@
+import matplotlib
+import pandas as pd
 import torch
 import numpy as np
 import torch
@@ -32,9 +34,10 @@ def return_labels(G):
 
 
 def get_adjacency_matrix(G):
+
     A = nx.adjacency_matrix(G)
-    A = A.todense()
-    A = np.asarray(A)
+    A = np.asarray(A.todense())
+
     return A
 
 
@@ -124,7 +127,7 @@ def get_incidence_matrix(G):
 
 
 def tsvd(features):
-    tsvd = TruncatedSVD(500)
+    tsvd = TruncatedSVD(n_components=3000)
     tsvd_features = tsvd.fit_transform(features)
     return tsvd_features
 
@@ -170,8 +173,6 @@ def get_data(graph_data, folder_path):
             # print(f"embeddings: {embeddings.shape} \t {type(embeddings)}")
             distance = get_dist_matrix(G)
             # print(f"distance: {distance.shape} \t {type(distance)}")
-            degrees = get_degree_matrix(G)
-            # print(f"degrees: {degrees.shape} \t {type(degrees)}")
             features = get_features(G)
             # print(f"features: {features.shape} \t {type(features)}")
             laplacian = get_laplacian(G)
@@ -180,13 +181,13 @@ def get_data(graph_data, folder_path):
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
             incidences = tsvd(incidences)
             # print(f"incidences: {incidences.shape} \t {type(incidences)}")
-            clustering_matrix = get_clustering(G)
-            print(
-                f"clustering_matrix: {clustering_matrix.shape} \t {type(clustering_matrix)}"
-            )
+            # clustering_matrix = get_clustering(G)
+            # print(
+            #     f"clustering_matrix: {clustering_matrix.shape} \t {type(clustering_matrix)}"
+            # )
             A_clustered = get_A_clustered(G)
             # print(f"A_clustered: {A_clustered.shape} \t {type(A_clustered)}")
-            data.x = torch.from_numpy(clustering_matrix).float()
+            data.x = torch.from_numpy(incidences).float()
             data.y = return_labels(G)
             data.train_mask, data.val_mask, data.test_mask = retrieve_masks(data.y)
             data_list.append(data)
@@ -241,3 +242,6 @@ def create_plot(G, nodelist, colors, name):
     plt.axis("off")
     plt.savefig("%s.png" % (name))
     plt.close()
+
+
+

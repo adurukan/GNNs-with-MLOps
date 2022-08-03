@@ -5,27 +5,26 @@ import sys
 
 
 class GAT(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
+    def __init__(self, out_channels):
 
-        self.conv1 = GATConv(in_channels, 50, heads=10, dropout=0.2)
-        self.conv2 = GATConv(50 * 10, 10, heads=8, dropout=0.2)
-        self.conv3 = GATConv(10 * 8, 10, heads=4, dropout=0.2)
-        self.conv4 = GATConv(10 * 4, 10, heads=1, dropout=0.2)
-        self.conv5 = GATConv(10 * 1, out_channels, heads=1, concat=False, dropout=0.5)
+        super().__init__()
+        self.conv1 = GATConv(-1, 256, heads=10, dropout=0.2)
+        self.conv2 = GATConv(256 * 10, 56, heads=8, dropout=0.2)
+        self.conv3 = GATConv(56 * 8, 32, heads=4, dropout=0.2)
+        self.conv4 = GATConv(32 * 4, out_channels, heads=1, concat=False)
+
 
     def forward(self, x, edge_index):
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = F.elu(self.conv1(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = F.elu(self.conv2(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = F.elu(self.conv3(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = F.elu(self.conv4(x, edge_index))
-        x = F.dropout(x, p=0.2, training=self.training)
-        x = self.conv5(x, edge_index)
-        return F.log_softmax(x, dim=1)
+
+        x = F.leaky_relu(self.conv1(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv2(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv3(x, edge_index), 0.1)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.leaky_relu(self.conv4(x, edge_index), 0.1)
+        # x = self.conv5(x, edge_index)
+        return F.softmax(x, dim=1)
 
 
 def create_save_model():
